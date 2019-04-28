@@ -44,13 +44,14 @@ In previous projects, we trained a *single* agent to learn a task. In a *multi-a
 - `T`: The probability transition function `T:S * A ---> S` where `A = prod_{i=1}^n A_i` the set of product of all actions.
 
 To train the agents, here are some possible approaches using previous single agent methods we have learned so far:
-1- **Train them separately**: Each agent sees the others as part of the environment:
+
+1. **Train them separately**: Each agent sees the others as part of the environment:
     - If using an offline-based method (using experience replay),  each agent's policy is changing as training progresses, so the environment becomes non-stationary from the perspective of any individual agent (in a way that is not explainable by changes in the agent’s own policy). Notice stationarity is assumed in most single agent RL algorithms as it is necessary for the convergence guarantees to hold.
     - If using an online-based method, the agent exhibits even higher variance as it tries to coordinate with other agents. As `R_i` is actually dependent on `pi_j` for `j` not equal to `i` , optimizing `R_i` solely based on `pi_i` is not possible and introduces a lot of variance.
-2- **Meta-agent approach**: This takes into account all agents. A single policy `pi: S ---> prod A_i` is computed for all agents and gives in return an action for each agent. In this setting, we have typically a global reward in return, i.e. a function `R` from `S * A` to real numbers. The disadvantages are:
+2. **Meta-agent approach**: This takes into account all agents. A single policy `pi: S ---> prod A_i` is computed for all agents and gives in return an action for each agent. In this setting, we have typically a global reward in return, i.e. a function `R` from `S * A` to real numbers. The disadvantages are:
     - `A` increases exponentially with the number of agents.
     - Each agent may have different observation of the environment state (if they see the environment locally or have partial observations), so it will be difficult to set a disambiguous state from local observations. So this approach works **only** when each agent knows everything about the environment.
-3- **Self-play approach**: This approach may actually work in certain circumstances and will turn out to be the best one in this project. Imagine a single brain (e.g. DQN, DDPG, PPO, etc.) which gets the observation of each agent and outputs an action for each agent. There are usually two scenarios in this approach:
+3. **Self-play approach**: This approach may actually work in certain circumstances and will turn out to be the best one in this project. Imagine a single brain (e.g. DQN, DDPG, PPO, etc.) which gets the observation of each agent and outputs an action for each agent. There are usually two scenarios in this approach:
     - When the agents have to take turn to act. In this case, no matter whether the environment is collaborative or competitive (like in a zero-sum game such as Go or Chess), the single brain will take the perspective of each agent in their respective turn, i.e. it takes as input the observation of the respective agent, and tries to make the best move as if it were that agent. It should be noted that if the environment is competitive (e.g. if first player wins, reward is +1, while if it loses, reward is -1), then the rewards of the second player need to be changed by a negative sign if we are computing the total reward for the first player. A famous example of this method augmented by a Monte-Carlo Tree Search can be found [here](https://arxiv.org/abs/1712.01815).
     - When the agents act simultaneously, which is the case in our project. Then the brain will have to take both observations (like a batch of dimension 2) and output the actions for each agent. Notice *symmetry* is vital for this algorithm to work; if the blue and red agent's observations are exchanged, the best move and the reward should also be exchanged. Hence there should not be any *real* difference between the blue and the red agent. This is obviously the case in this project.
 
@@ -201,33 +202,33 @@ SEED=7                 # random seed
 ```
 which showed some stability and led in many different runs to the same solution. Notice how high the soft-update parameter `tau` is; it is usually a tenth of that. The best run was in 267 episodes:
 
-<img src="assets/Proj3DDPGsingle267.PNG" width="50%" align="top-left" alt="" title="DDPG single agent history 267" />
+<img src="assets/Proj3DDPGsingle267.PNG" width="70%" align="top-left" alt="" title="DDPG single agent history 267" />
 
 Some other runs took more time to solve the environment:
 
-<img src="assets/Proj3DDPGsingle482withdropout.PNG" width="50%" align="top-left" alt="" title="DDPG single agent history 482" />
+<img src="assets/Proj3DDPGsingle482withdropout.PNG" width="70%" align="top-left" alt="" title="DDPG single agent history 482" />
 
-<img src="assets/Proj3DDPGsingle482plotwithdropout.PNG" width="50%" align="top-left" alt="" title="DDPG single agent plot 482" />
+<img src="assets/Proj3DDPGsingle482plotwithdropout.PNG" width="70%" align="top-left" alt="" title="DDPG single agent plot 482" />
 
 [Here](https://youtu.be/tgcoUden60w) we can see a *perfect* play of the agents along with some other imperfect runs. Notice the strategy is to keep the rackets close to the end of the table and not move them much, instead focusing on the accuracy of each hit to reach the other end of the table.
 
 We also managed to solve the environment with a different set of hyperparameters (different seed, almost equal `lr_critic` and `lr_actor` and lower soft-update parameter like 0.06 instead of 0.2) as it can be seen in the `Checkpoints` folder in 621 and 700 episodes, by using hidden layers of size 400-300 and no dropout.
 
-<img src="assets/Proj3DDPGsingle621withoutdropout400300.PNG" width="50%" align="top-left" alt="" title="DDPG single agent history 621" />
+<img src="assets/Proj3DDPGsingle621withoutdropout400300.PNG" width="70%" align="top-left" alt="" title="DDPG single agent history 621" />
 
-<img src="assets/Proj3DDPGsingle700withoutdropout400300.PNG" width="50%" align="top-left" alt="" title="DDPG single agent history 700" />
+<img src="assets/Proj3DDPGsingle700withoutdropout400300.PNG" width="70%" align="top-left" alt="" title="DDPG single agent history 700" />
 
 A feature of the `DDPG_train()` function is that it can take many DDPG agents. So we can try the first method of "**Train them separately**" described in the second section. When we do so, using the same hyperparameters as our best solution, we find another strategy in 1410 epsiodes. We can see [here](https://youtu.be/vbLgDnSx1us) some plays of this algorithm, where the strategy is to hit the ball and move immediately the racket close to the net, in contrast to the previous solution. We also notice the instability in the training plot where the moving average twice went close to the 0.5 threshold only to pull back and try again later. The third time, it was successful!
 
-<img src="assets/Proj3DDPGdouble1410plotwithdropout.PNG" width="50%" align="top-left" alt="" title="DDPG double agent plot" />
+<img src="assets/Proj3DDPGdouble1410plotwithdropout.PNG" width="70%" align="top-left" alt="" title="DDPG double agent plot" />
 
-<img src="assets/Proj3DDPGdouble1410withdropout.PNG" width="50%" align="top-left" alt="" title="DDPG double agent history" />
+<img src="assets/Proj3DDPGdouble1410withdropout.PNG" width="70%" align="top-left" alt="" title="DDPG double agent history" />
 
 We thought we could achieve similar success using PPO self-play, but it was not possible and the agent could not hit anywhere above ~0.05. The code is provided in the `PPO` folder and all hyperparameters can be tuned directly in the notebook `PPO_main.ipynb`.
 
 ##### &nbsp;
 ## 6. Possible Future Improvements and Directions
-1- Try to understand the reasons behind the failure/significant instability of MADDPG and MAPPO. Perhaps there is a way to stabilize these algorithms, at least for the current problem. It looks like one simple reason behind the instability of the training plot, where there are spikes followed by low scores, is the fact that the next episode starts immediately after the ball hits the table, without any reset of the rackets positions! So each time after reset, we are starting from a different state than before and the rackets may be far away from the ball. Perhaps *forgetting* these episodes could be beneficial.
-2- See if there is a way to batch normalize the rewards and advantages in MAPPO, as lengths of the collected episodes can be widely different. 
-3- Try to solve the environment using PPO self-play; perhaps we just need a better search on the hyperparameters.
-4- Finally, another project is the *soccer* problem (described in `README.md`), and we hope to work on this in the future to see how our algorithms will perform in that environment. 
+1. Try to understand the reasons behind the failure/significant instability of MADDPG and MAPPO. Perhaps there is a way to stabilize these algorithms, at least for the current problem. It looks like one simple reason behind the instability of the training plot, where there are spikes followed by low scores, is the fact that the next episode starts immediately after the ball hits the table, without any reset of the rackets positions! So each time after reset, we are starting from a different state than before and the rackets may be far away from the ball. Perhaps *forgetting* these episodes could be beneficial.
+2. See if there is a way to batch normalize the rewards and advantages in MAPPO, as lengths of the collected episodes can be widely different. 
+3. Try to solve the environment using PPO self-play; perhaps we just need a better search on the hyperparameters.
+4. Finally, another project is the *soccer* problem (described in `README.md`), and we hope to work on this in the future to see how our algorithms will perform in that environment. 
