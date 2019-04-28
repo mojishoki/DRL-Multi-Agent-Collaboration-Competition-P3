@@ -41,9 +41,13 @@ Read the `Report.md` for full implementation details.
 ---
 
 # Instructions
-The implementation here is for Windows (64-bit). For each agent (DDPG, PPO, MADDPG, MAPPO), start from the `_main.ipynb` file in their respective folder. To run the agent locally, you need to install unity ml-agents 0.4. You can find it [here](https://github.com/Unity-Technologies/ml-agents/tree/0.4.0b). 
+The implementation here is for Windows (64-bit). For each agent (DDPG, PPO, MADDPG, MAPPO), start from the `_main.ipynb` file in their respective folder. 
 
-We work with the environment which is in `Tennis_Windows_x86_64`. The optional part of the project (not done yet) can be used by setting `file_name=../Soccer_Windows_x86_64/Soccer.exe` in the first block of each `_main.ipynb` file. If you have an operating system other than Windows (64-bit), you can download the environment for your OS using the links provided further below.
+To run the agent locally, first you need to install unity ml-agents 0.4. You can find it [here](https://github.com/Unity-Technologies/ml-agents/tree/0.4.0b); Clone it and go to the `python` folder and run `python setup.py`.
+
+Now, after cloning our repository, activate the ml-agents environment by running `activate ml-agents`, go to the repository folder and run `pip install -r requirements.txt`.
+
+Here, we work with the environment which is in `Tennis_Windows_x86_64`. The optional part of the project (not done yet) can be used by setting `file_name=../Soccer_Windows_x86_64/Soccer.exe` in the first block of each `_main.ipynb` file. If you have an operating system other than Windows (64-bit), you can download the environment for your OS using the links provided further below.
 
 ---
 
